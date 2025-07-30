@@ -87,6 +87,7 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					   <mainClass>com.apisentinel.APISentinelApplication</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
