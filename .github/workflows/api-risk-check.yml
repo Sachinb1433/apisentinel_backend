@@ -1,0 +1,57 @@
+name: API Sentinel Risk Check
+
+on:
+  pull_request:
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.json"
+
+jobs:
+  scan-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v3
+
+      - name: Find API Spec Files
+        id: find_spec
+        run: |
+          file=$(find . -name "*.yaml" -o -name "*.json" | head -n 1)
+          if [ -z "$file" ]; then
+            echo "No API spec file found."
+            echo "file_path=" >> $GITHUB_OUTPUT
+          else
+            echo "Found file: $file"
+            echo "file_path=$file" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fail if no file
+        if: steps.find_spec.outputs.file_path == ''
+        run: |
+          echo "❌ No OpenAPI/Swagger file found in PR. Failing."
+          exit 1
+
+      - name: Send file to API Sentinel backend
+        id: scan
+        run: |
+          response=$(curl -s -X POST http://your-server.com/api/scan-file \
+            -H "Content-Type: multipart/form-data" \
+            -F "file=@${{ steps.find_spec.outputs.file_path }}")
+          
+          echo "Raw response: $response"
+          score=$(echo $response | jq '.riskScore')
+
+          echo "risk_score=$score" >> $GITHUB_OUTPUT
+
+      - name: Block PR if risk too high
+        if: steps.scan.outputs.risk_score > 60
+        run: |
+          echo "❌ Risk score ${{ steps.scan.outputs.risk_score }} is too high! Blocking PR."
+          exit 1
+
+      - name: Approve PR if risk is acceptable
+        if: steps.scan.outputs.risk_score <= 60
+        run: |
+          echo "✅ API Risk score is within acceptable threshold."

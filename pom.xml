@@ -61,6 +61,17 @@
 			<version>2.1.16</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.javatechie</groupId>
+			<artifactId>spring-boot-crud-example-2</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<!-- Elasticsearch 8.x+ support -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+</dependency>
+
 	</dependencies>
 
 	<build>
